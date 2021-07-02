@@ -28,3 +28,16 @@ class Bot(db.Model):
 
     def __repr__(self):
         return f"{self.name} by {self.author}"
+
+
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(50), unique=True, nullable=False)
+    password = db.Column(db.String(100), nullable=False)
+    username = db.Column(db.String(100), nullable=False, unique=True)
+
+    def __str__(self):
+        return f"{self.username}"
+
+    def __repr__(self):
+        return f"{self.username}"
