@@ -1,5 +1,6 @@
 from flask_restful import Api
-from .resources import *
+from .resources import CategoryListResource, CategoryDetailResource, BotListOrCreateResource, BotResource, \
+    SignUpUserResource, UserLoginResource, UsersListResource
 from app import app
 
 api = Api(app)
