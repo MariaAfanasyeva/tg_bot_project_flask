@@ -1,5 +1,5 @@
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
-from .models import Category, Bot
+from .models import Category, Bot, User
 
 
 class CategorySchema(SQLAlchemySchema):
@@ -32,3 +32,17 @@ class BotSchema(SQLAlchemySchema):
 
 bot_schema = BotSchema()
 bots_schema = BotSchema(many=True)
+
+
+class UserSchema(SQLAlchemySchema):
+    class Meta:
+        model = User
+
+    id = auto_field()
+    username = auto_field()
+    password = auto_field()
+    email = auto_field()
+
+
+user_schema = UserSchema()
+users_schema = UserSchema(many=True)
