@@ -28,7 +28,8 @@ class UserLoginResource(Resource):
 
 class CategoryListResource(Resource):
     def get(self):
-        return pagination.paginate(Category, categories_schema, True, pagination_schema_hook=pagination_schema)
+        categories = Category.query.all()
+        return categories_schema.dump(categories)
 
     def post(self):
         name = request.json['name']
