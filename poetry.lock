@@ -61,6 +61,18 @@ async = ["asgiref (>=3.2)"]
 dotenv = ["python-dotenv"]
 
 [[package]]
+name = "flask-cors"
+version = "3.0.10"
+description = "A Flask extension adding a decorator for CORS support"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+Flask = ">=0.9"
+Six = "*"
+
+[[package]]
 name = "flask-jwt-extended"
 version = "4.2.1"
 description = "Extended JWT integration with Flask"
@@ -108,6 +120,18 @@ python-versions = "*"
 alembic = ">=0.7"
 Flask = ">=0.9"
 Flask-SQLAlchemy = ">=1.0"
+
+[[package]]
+name = "flask-rest-paginate"
+version = "1.1.3"
+description = "Pagination extension for flask-restful"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+flask-restful = "*"
+flask-sqlalchemy = "*"
 
 [[package]]
 name = "flask-restful"
@@ -339,7 +363,7 @@ watchdog = ["watchdog"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "39cdee8b1cbe5672c12bdd1134034e37b632f31938333678116002957b7a8c04"
+content-hash = "764a5c9203c1525fd33daecbde1b58582abc5e958bc768d8c5ffd47bcab3ecd1"
 
 [metadata.files]
 alembic = [
@@ -362,6 +386,10 @@ flask = [
     {file = "Flask-2.0.1-py3-none-any.whl", hash = "sha256:a6209ca15eb63fc9385f38e452704113d679511d9574d09b2cf9183ae7d20dc9"},
     {file = "Flask-2.0.1.tar.gz", hash = "sha256:1c4c257b1892aec1398784c63791cbaa43062f1f7aeb555c4da961b20ee68f55"},
 ]
+flask-cors = [
+    {file = "Flask-Cors-3.0.10.tar.gz", hash = "sha256:b60839393f3b84a0f3746f6cdca56c1ad7426aa738b70d6c61375857823181de"},
+    {file = "Flask_Cors-3.0.10-py2.py3-none-any.whl", hash = "sha256:74efc975af1194fc7891ff5cd85b0f7478be4f7f59fe158102e91abb72bb4438"},
+]
 flask-jwt-extended = [
     {file = "Flask-JWT-Extended-4.2.1.tar.gz", hash = "sha256:76461f2dbdf502261c69ddecd858eaf4164fbcfbf05aa456f3927fc2ab0315de"},
     {file = "Flask_JWT_Extended-4.2.1-py2.py3-none-any.whl", hash = "sha256:6a9d7a45d4c4b4c6277aee40f07cdf5fe307c29d404700a2ba8ebf520b30abee"},
@@ -373,6 +401,9 @@ flask-marshmallow = [
 flask-migrate = [
     {file = "Flask-Migrate-3.0.1.tar.gz", hash = "sha256:4d42e8f861d78cb6e9319afcba5bf76062e5efd7784184dd2a1cccd9de34a702"},
     {file = "Flask_Migrate-3.0.1-py2.py3-none-any.whl", hash = "sha256:df9043d2050df3c0e0f6313f6b529b62c837b6033c20335e9d0b4acdf2c40e23"},
+]
+flask-rest-paginate = [
+    {file = "flask_rest_paginate-1.1.3-py3-none-any.whl", hash = "sha256:cd8f88210e959b8a2339003f76e303ae221ba7df190bef8714b474aa9c4a3e9d"},
 ]
 flask-restful = [
     {file = "Flask-RESTful-0.3.9.tar.gz", hash = "sha256:ccec650b835d48192138c85329ae03735e6ced58e9b2d9c2146d6c84c06fa53e"},
