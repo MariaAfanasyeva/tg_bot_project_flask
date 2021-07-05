@@ -29,7 +29,7 @@ app.config['JWT_SECRET_KEY'] = os.environ.get("JWT_SECRET_KEY")
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = datetime.timedelta(minutes=30)
 app.config['PAGINATE_PAGE_SIZE'] = 2
 app.config['PAGINATE_PAGINATION_OBJECT_KEY'] = None
-app.config['PAGINATE_DATA_OBJECT_KEY'] = 'items'
+app.config['PAGINATE_DATA_OBJECT_KEY'] = 'results'
 
 db = SQLAlchemy(app)
 
