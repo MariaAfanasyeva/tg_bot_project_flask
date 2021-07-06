@@ -41,8 +41,8 @@ class CategoryListResource(Resource):
 
 class CategoryDetailResource(Resource):
     def get(self, id):
-        category = Category.query.get_or_404(id)
-        return category_schema.dump(category)
+        bots = Bot.query.filter_by(category_id=id)
+        return pagination.paginate(bots, bots_schema, True, pagination_schema_hook=pagination_schema)
 
 
 class BotListOrCreateResource(Resource):
