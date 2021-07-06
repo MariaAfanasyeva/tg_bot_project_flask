@@ -7,7 +7,7 @@ class BotSchema(Schema):
     description = fields.Str()
     link = fields.Str()
     author = fields.Str()
-    category_id = fields.Int()
+    category_id = fields.Integer()
 
 
 bot_schema = BotSchema()
