@@ -20,6 +20,7 @@ marshmallow-sqlalchemy = "^0.26.1"
 Flask-Migrate = "^3.0.1"
 Flask-RESTful = "^0.3.9"
 Flask-JWT-Extended = "^4.2.1"
+flask-swagger-ui = "^3.36.0"
 
 [tool.poetry.dev-dependencies]
 

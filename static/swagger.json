@@ -1,0 +1,275 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "description": "bots",
+    "version": "1.0.0",
+    "title": "Find-your-bot",
+    "contact": {
+      "email": "hahahah@gmail.com"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "tags": [
+    {
+      "name": "Bot Request",
+      "description": "Example API for requesting and return bot requests"
+    },
+    {
+      "name": "Category Request",
+      "description": "Example API for requesting and return category requests"
+    }
+  ],
+  "paths": {
+    "/categories": {
+      "get": {
+        "tags": [
+          "Category Request"
+        ],
+        "summary": "Returns categoryRequestBody",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/components/schemas/categoriesRequestBody"
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Category Request"
+        ],
+        "summary": "Create a new category request system",
+        "requestBody": {
+          "description": "Category Request POST Object",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/categoryPOSTRequestBody"
+              }
+            }
+          }
+        },
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "$ref": "#/components/schemas/id"
+            }
+          },
+          "400": {
+            "description": "Failed. Bad post data"
+          }
+        }
+      }
+    },
+    "/category/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "description": "ID of the bot that we want to get info",
+          "type": "integer"
+        }
+      ],
+      "get": {
+        "tags": [
+          "Category Request"
+        ],
+        "summary": "Get the bot request with given ID",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "Bot Request id",
+            "schema": {
+              "$ref": "#/components/schemas/id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/components/schemas/botRequestBody"
+            }
+          },
+           "400": {
+            "description": "Failed. Misunderstood Request."
+          },
+          "404": {
+            "description": "Failed. Book request not found."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "id": {
+        "properties": {
+          "uuid": {
+            "type": "string"
+          }
+        }
+      },
+      "categoryRequestBody": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "number"
+          },
+          "name": {
+            "type": "string",
+            "format": "string"
+          }
+        }
+      },
+      "categoryPOSTRequestBody": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "format": "string"
+          }
+        }
+      },
+      "categoriesRequestBody": {
+        "type": "object",
+        "properties": {
+          "categoryRequestBody": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/categoryRequestBody"
+            }
+          }
+        }
+      },
+      "botRequestBody": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "number"
+          },
+          "name": {
+            "type": "string",
+            "format": "string"
+          },
+          "description": {
+            "type": "string",
+            "format": "string"
+          },
+          "link": {
+            "type": "string",
+            "format": "string"
+          },
+          "author": {
+            "type": "string",
+            "format": "string"
+          },
+          "category_id": {
+            "type": "string",
+            "format": "number"
+          }
+        }
+      },
+      "botsRequestBody": {
+        "type": "object",
+        "properties": {
+          "botRequestBody": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/botRequestBody"
+            }
+          }
+        }
+      },
+      "botPOSTRequestBody": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "format": "string"
+          },
+          "description": {
+            "type": "string",
+            "format": "string"
+          },
+          "link": {
+            "type": "string",
+            "format": "string"
+          },
+          "author": {
+            "type": "string",
+            "format": "string"
+          },
+          "category_id": {
+            "type": "string",
+            "format": "number"
+          }
+        }
+      },
+      "userRequestBody": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "number"
+          },
+          "username": {
+            "type": "string",
+            "format": "string"
+          },
+          "password": {
+            "type": "string",
+            "format": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          }
+        }
+      },
+      "userPOSTRequestBody": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "format": "string"
+          },
+          "password": {
+            "type": "string",
+            "format": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          }
+        }
+      },
+      "usersRequestBody": {
+        "type": "object",
+        "properties": {
+          "userRequestBody": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/userRequestBody"
+            }
+          }
+        }
+      }
+    }
+
+  }
+}
