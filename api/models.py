@@ -1,3 +1,5 @@
+import datetime
+
 from app import db
 from sqlalchemy.sql import func
 from sqlalchemy.ext.declarative import declared_attr
@@ -5,7 +7,7 @@ from sqlalchemy.ext.declarative import declared_attr
 
 class BaseModel(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    create_date = db.Column(db.DateTime, server_default=func.now())
+    create_date = db.Column(db.DateTime, default=datetime.datetime.utcnow())
     update_date = db.Column(db.DateTime, server_default=func.now(), onupdate=func.now())
 
 
