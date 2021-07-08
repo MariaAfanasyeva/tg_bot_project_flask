@@ -2,23 +2,19 @@ import datetime
 
 from app import db
 from sqlalchemy.sql import func
-from sqlalchemy.ext.declarative import declared_attr
 
 
 class BaseModel(db.Model):
+    __abstract__ = True
     id = db.Column(db.Integer, primary_key=True)
-    create_date = db.Column(db.DateTime, default=datetime.datetime.utcnow())
-    update_date = db.Column(db.DateTime, server_default=func.now(), onupdate=func.now())
+    create_time = db.Column(db.DateTime, default=datetime.datetime.utcnow())
+    update_time = db.Column(db.DateTime, server_default=func.now(), onupdate=func.now())
 
 
 class Category(BaseModel):
     __tablename__ = 'category'
-    id = db.Column(db.Integer, db.ForeignKey('base_model.id'), primary_key=True)
     bots = db.relationship('Bot', backref='category', lazy=True)
-
-    @declared_attr
-    def name(cls):
-        return BaseModel.__table__.c.get('name', db.Column(db.String(100), nullable=False))
+    name = db.Column(db.String(100), nullable=False)
 
     def __str__(self):
         return f"{self.name}"
@@ -29,17 +25,13 @@ class Category(BaseModel):
 
 class Bot(BaseModel):
     __tablename__ = 'bot'
-    id = db.Column(db.Integer, db.ForeignKey('base_model.id'), primary_key=True)
     description = db.Column(db.Text, nullable=False)
     link = db.Column(db.String(250), nullable=False)
     author = db.Column(db.String(255), nullable=False)
     category_id = db.Column(db.Integer, db.ForeignKey('category.id', ondelete="SET NULL"),
                             nullable=True,
                             default=None)
-
-    @declared_attr
-    def name(cls):
-        return BaseModel.__table__.c.get('name', db.Column(db.String(100), nullable=False))
+    name = db.Column(db.String(100), nullable=False)
 
     def __str__(self):
         return f"{self.name} by {self.author}"
