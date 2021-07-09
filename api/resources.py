@@ -8,11 +8,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token, jwt_required
 
 
-pagination_schema = lambda current_page, page_obj: {
-    "count": page_obj.total
-}
-
-
 class UserLoginResource(Resource):
     def post(self):
         username = request.json['username']
@@ -41,13 +36,19 @@ class CategoryListResource(Resource):
 
 class CategoryDetailResource(Resource):
     def get(self, id):
-        category = Category.query.get_or_404(id)
-        return category_schema.dump(category)
+        bots = Bot.query.filter_by(category_id=id)
+        return pagination.paginate(bots, bots_schema, marshmallow=True,
+                                   pagination_schema_hook=lambda current_page, page_obj: {
+                                        "count": page_obj.total
+                                    })
 
 
 class BotListOrCreateResource(Resource):
     def get(self):
-        return pagination.paginate(Bot, bots_schema, True, pagination_schema_hook=pagination_schema)
+        return pagination.paginate(Bot, bots_schema, marshmallow=True,
+                                   pagination_schema_hook=lambda current_page, page_obj: {
+                                        "count": page_obj.total
+                                    })
 
     @jwt_required()
     def post(self):

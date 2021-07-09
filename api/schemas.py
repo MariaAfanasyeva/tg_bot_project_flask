@@ -1,47 +1,33 @@
-from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
-from .models import Category, Bot, User
+from marshmallow import Schema, fields
 
 
-class CategorySchema(SQLAlchemySchema):
-    class Meta:
-        model = Category
-        include_relationships = True
-        load_instance = True
-
-    id = auto_field()
-    name = auto_field()
-
-
-category_schema = CategorySchema()
-categories_schema = CategorySchema(many=True)
-
-
-class BotSchema(SQLAlchemySchema):
-    class Meta:
-        model = Bot
-        include_relationships = True
-        load_instance = True
-
-    id = auto_field()
-    name = auto_field()
-    description = auto_field()
-    link = auto_field()
-    author = auto_field()
-    category_id = auto_field()
+class BotSchema(Schema):
+    id = fields.Integer(dump_only=True)
+    name = fields.Str()
+    description = fields.Str()
+    link = fields.Str()
+    author = fields.Str()
+    category_id = fields.Integer()
 
 
 bot_schema = BotSchema()
 bots_schema = BotSchema(many=True)
 
 
-class UserSchema(SQLAlchemySchema):
-    class Meta:
-        model = User
+class CategorySchema(Schema):
+    id = fields.Integer(dump_only=True)
+    name = fields.Str()
 
-    id = auto_field()
-    username = auto_field()
-    password = auto_field()
-    email = auto_field()
+
+category_schema = CategorySchema()
+categories_schema = CategorySchema(many=True)
+
+
+class UserSchema(Schema):
+    id = fields.Integer(dump_only=True)
+    username = fields.Str()
+    password = fields.Str()
+    email = fields.Email()
 
 
 user_schema = UserSchema()
