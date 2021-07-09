@@ -1,5 +1,6 @@
 from .schemas import *
 from .models import Category, Bot, User
+from app import pagination
 from flask_restful import Resource
 from app import db
 from flask import request, jsonify
@@ -35,14 +36,19 @@ class CategoryListResource(Resource):
 
 class CategoryDetailResource(Resource):
     def get(self, id):
-        category = Category.query.get_or_404(id)
-        return category_schema.dump(category)
+        bots = Bot.query.filter_by(category_id=id)
+        return pagination.paginate(bots, bots_schema, marshmallow=True,
+                                   pagination_schema_hook=lambda current_page, page_obj: {
+                                        "count": page_obj.total
+                                    })
 
 
 class BotListOrCreateResource(Resource):
     def get(self):
-        bots = Bot.query.all()
-        return bots_schema.dump(bots)
+        return pagination.paginate(Bot, bots_schema, marshmallow=True,
+                                   pagination_schema_hook=lambda current_page, page_obj: {
+                                        "count": page_obj.total
+                                    })
 
     @jwt_required()
     def post(self):
