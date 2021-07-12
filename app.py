@@ -1,8 +1,9 @@
 import datetime
+import logging
 import os
 
 from dotenv import find_dotenv, load_dotenv
-from flask import Flask
+from flask import Flask, request
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate
@@ -42,6 +43,19 @@ SWAGGERUI_BLUEPRINT = get_swaggerui_blueprint(
     SWAGGER_URL, API_URL, config={"app_name": "Find-your-bot"}
 )
 app.register_blueprint(SWAGGERUI_BLUEPRINT, url_prefix=SWAGGER_URL)
+
+
+@app.after_request
+def after_request(response):
+    app.logger.error("Testing after request")
+    print(response.json, response.status)
+    return response
+
+
+@app.before_request
+def before_request():
+    print(request.headers.get("Authorization"), request.method, request.url)
+
 
 from api.urls import *
 
