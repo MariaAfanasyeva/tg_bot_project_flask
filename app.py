@@ -1,9 +1,9 @@
 import datetime
-import logging
 import os
+from logging.config import dictConfig
 
 from dotenv import find_dotenv, load_dotenv
-from flask import Flask, request
+from flask import Flask
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate
@@ -12,6 +12,26 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_swagger_ui import get_swaggerui_blueprint
 
 load_dotenv(find_dotenv(".env"))
+
+
+dictConfig(
+    {
+        "version": 1,
+        "formatters": {
+            "default": {
+                "format": "[%(asctime)s] %(levelname)s in %(module)s: %(message)s",
+            }
+        },
+        "handlers": {
+            "wsgi": {
+                "class": "logging.StreamHandler",
+                "stream": "ext://flask.logging.wsgi_errors_stream",
+                "formatter": "default",
+            }
+        },
+        "root": {"level": "INFO", "handlers": ["wsgi"]},
+    }
+)
 
 app = Flask(__name__)
 cors = CORS(resources={r"/*": {"origins": ["http://localhost:3000"]}})
@@ -43,18 +63,6 @@ SWAGGERUI_BLUEPRINT = get_swaggerui_blueprint(
     SWAGGER_URL, API_URL, config={"app_name": "Find-your-bot"}
 )
 app.register_blueprint(SWAGGERUI_BLUEPRINT, url_prefix=SWAGGER_URL)
-
-
-@app.after_request
-def after_request(response):
-    app.logger.error("Testing after request")
-    print(response.json, response.status)
-    return response
-
-
-@app.before_request
-def before_request():
-    print(request.headers.get("Authorization"), request.method, request.url)
 
 
 from api.urls import *

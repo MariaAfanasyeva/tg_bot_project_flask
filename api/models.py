@@ -1,8 +1,12 @@
 import datetime
 
+from sqlalchemy import event
+from sqlalchemy.orm import Session
 from sqlalchemy.sql import func
 
 from app import db
+from services.logging_funcs import (after_request_log, before_request_log,
+                                    before_rollback_log, session_handler)
 
 
 class BaseModel(db.Model):
@@ -37,6 +41,12 @@ class Bot(BaseModel):
         default=None,
     )
     name = db.Column(db.String(100), nullable=False)
+    add_by_user = db.Column(
+        db.Integer,
+        db.ForeignKey("user.id", ondelete="SET NULL"),
+        nullable=True,
+        default=True,
+    )
 
     def __str__(self):
         return f"{self.name} by {self.author}"
@@ -46,6 +56,7 @@ class Bot(BaseModel):
 
 
 class User(BaseModel):
+    __tablename__ = "user"
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(50), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
@@ -56,3 +67,36 @@ class User(BaseModel):
 
     def __repr__(self):
         return f"{self.username}"
+
+
+@event.listens_for(Session, "before_flush")
+def session_before_flush(session, flush_context, instanses):
+    about_session = session_handler(session)
+    before_request_log(
+        about_session["model"],
+        about_session["user_id"],
+        about_session["method"],
+        about_session["raw_id"],
+    )
+
+
+@event.listens_for(Session, "after_flush")
+def session_after_flush(session, flush_context):
+    about_session = session_handler(session)
+    after_request_log(
+        about_session["model"],
+        about_session["user_id"],
+        about_session["method"],
+        about_session["raw_id"],
+    )
+
+
+@event.listens_for(Session, "after_rollback")
+def session_after_rollback(session):
+    about_session = session_handler(session)
+    before_rollback_log(
+        about_session["model"],
+        about_session["user_id"],
+        about_session["method"],
+        about_session["raw_id"],
+    )

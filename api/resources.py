@@ -1,5 +1,6 @@
 from flask import jsonify, request
-from flask_jwt_extended import create_access_token, jwt_required
+from flask_jwt_extended import (create_access_token, get_jwt_identity,
+                                jwt_required)
 from flask_restful import Resource
 from sqlalchemy import or_
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -83,6 +84,7 @@ class BotListOrCreateResource(Resource):
             link=link,
             author=author,
             category_id=category_id,
+            add_by_user=get_jwt_identity(),
         )
         db.session.add(new_bot)
         db.session.commit()
@@ -102,11 +104,12 @@ class BotResource(Resource):
         bot.link = request.json["link"]
         bot.author = request.json["author"]
         bot.category_id = request.json["category_id"]
+        bot.add_by_user = get_jwt_identity()
         db.session.commit()
         return bot_schema.dump(bot)
 
     @jwt_required()
-    def delete(self):
+    def delete(self, id):
         bot = Bot.query.get_or_404(id)
         db.session.delete(bot)
         db.session.commit()
