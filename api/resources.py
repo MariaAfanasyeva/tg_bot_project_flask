@@ -45,8 +45,7 @@ class CategoryDetailResource(Resource):
 
 class BotListOrCreateResource(Resource):
     def get(self):
-        if request.args.get("search"):
-            search_parameter = request.args.get("search")
+        if search_parameter := request.args.get("search"):
             bots = Bot.query.filter(
                 or_(
                     Bot.name.ilike(f"%{search_parameter}%"),
