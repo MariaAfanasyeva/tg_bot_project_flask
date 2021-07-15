@@ -54,22 +54,29 @@ class BotListOrCreateResource(Resource):
     def get(self):
         if request.args.get("search"):
             search_parameter = request.args.get("search")
+            return pagination.paginate(
+                Bot.query.filter(
+                    or_(
+                        Bot.name.ilike(f"%{search_parameter}%"),
+                        Bot.author.ilike(f"%{search_parameter}%"),
+                        Bot.description.ilike(f"%{search_parameter}%"),
+                    )
+                ),
+                bots_schema,
+                marshmallow=True,
+                pagination_schema_hook=lambda current_page, page_obj: {
+                    "count": page_obj.total
+                },
+            )
         else:
-            search_parameter = ""
-        return pagination.paginate(
-            Bot.query.filter(
-                or_(
-                    Bot.name.ilike(f"%{search_parameter}%"),
-                    Bot.author.ilike(f"%{search_parameter}%"),
-                    Bot.description.ilike(f"%{search_parameter}%"),
-                )
-            ),
-            bots_schema,
-            marshmallow=True,
-            pagination_schema_hook=lambda current_page, page_obj: {
-                "count": page_obj.total
-            },
-        )
+            return pagination.paginate(
+                Bot,
+                bots_schema,
+                marshmallow=True,
+                pagination_schema_hook=lambda current_page, page_obj: {
+                    "count": page_obj.total
+                },
+            )
 
     @jwt_required()
     def post(self):

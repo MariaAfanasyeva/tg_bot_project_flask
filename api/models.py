@@ -11,13 +11,13 @@ from services.logging_funcs import (after_request_log, before_request_log,
 
 class BaseModel(db.Model):
     __abstract__ = True
+    id = db.Column(db.Integer, primary_key=True)
     create_time = db.Column(db.DateTime, default=datetime.datetime.utcnow())
     update_time = db.Column(db.DateTime, server_default=func.now(), onupdate=func.now())
 
 
 class Category(BaseModel):
     __tablename__ = "category"
-    id = db.Column(db.Integer, primary_key=True)
     bots = db.relationship("Bot", backref="category", lazy=True)
     name = db.Column(db.String(100), nullable=False)
 
@@ -30,7 +30,6 @@ class Category(BaseModel):
 
 class Bot(BaseModel):
     __tablename__ = "bot"
-    id = db.Column(db.Integer, primary_key=True)
     description = db.Column(db.Text, nullable=False)
     link = db.Column(db.String(250), nullable=False)
     author = db.Column(db.String(255), nullable=False)
@@ -38,14 +37,12 @@ class Bot(BaseModel):
         db.Integer,
         db.ForeignKey("category.id", ondelete="SET NULL"),
         nullable=True,
-        default=None,
     )
     name = db.Column(db.String(100), nullable=False)
     add_by_user = db.Column(
         db.Integer,
         db.ForeignKey("user.id", ondelete="SET NULL"),
         nullable=True,
-        default=True,
     )
 
     def __str__(self):
@@ -57,7 +54,6 @@ class Bot(BaseModel):
 
 class User(BaseModel):
     __tablename__ = "user"
-    id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(50), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
     username = db.Column(db.String(100), nullable=False, unique=True)
