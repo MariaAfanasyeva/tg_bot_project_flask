@@ -8,6 +8,7 @@ class BotSchema(Schema):
     link = fields.Str()
     author = fields.Str()
     category_id = fields.Integer()
+    add_by_user = fields.Integer()
 
 
 bot_schema = BotSchema()
