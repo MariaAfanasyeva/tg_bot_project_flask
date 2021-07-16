@@ -1,12 +1,9 @@
 import datetime
 
-from sqlalchemy import event
-from sqlalchemy.orm import Session
 from sqlalchemy.sql import func
+from sqlalchemy_logger import Logger
 
-from app import db
-from services.logging_funcs import (after_request_log, before_request_log,
-                                    before_rollback_log, session_handler)
+from app import app, db
 
 
 class BaseModel(db.Model):
@@ -65,34 +62,8 @@ class User(BaseModel):
         return f"{self.username}"
 
 
-@event.listens_for(Session, "before_flush")
-def session_before_flush(session, flush_context, instanses):
-    about_session = session_handler(session)
-    before_request_log(
-        about_session["model"],
-        about_session["user_id"],
-        about_session["method"],
-        about_session["raw_id"],
-    )
+logger = Logger(app)
 
-
-@event.listens_for(Session, "after_flush")
-def session_after_flush(session, flush_context):
-    about_session = session_handler(session)
-    after_request_log(
-        about_session["model"],
-        about_session["user_id"],
-        about_session["method"],
-        about_session["raw_id"],
-    )
-
-
-@event.listens_for(Session, "after_rollback")
-def session_after_rollback(session):
-    about_session = session_handler(session)
-    before_rollback_log(
-        about_session["model"],
-        about_session["user_id"],
-        about_session["method"],
-        about_session["raw_id"],
-    )
+logger.listen_before_flush()
+logger.listen_after_flush()
+logger.listen_after_rollback()
