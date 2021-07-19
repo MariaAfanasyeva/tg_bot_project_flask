@@ -3,7 +3,7 @@ from marshmallow import Schema, fields
 
 class BotSchema(Schema):
     id = fields.Integer(dump_only=True)
-    create_time = fields.DateTime()
+    create_time = fields.DateTime(dump_only=True)
     update_time = fields.DateTime()
     name = fields.Str()
     description = fields.Str()
@@ -19,7 +19,7 @@ bots_schema = BotSchema(many=True)
 
 class CategorySchema(Schema):
     id = fields.Integer(dump_only=True)
-    create_time = fields.DateTime()
+    create_time = fields.DateTime(dump_only=True)
     update_time = fields.DateTime()
     name = fields.Str()
 
@@ -30,7 +30,7 @@ categories_schema = CategorySchema(many=True)
 
 class UserSchema(Schema):
     id = fields.Integer(dump_only=True)
-    create_time = fields.DateTime()
+    create_time = fields.DateTime(dump_only=True)
     update_time = fields.DateTime()
     username = fields.Str()
     password = fields.Str()
@@ -43,7 +43,7 @@ users_schema = UserSchema(many=True)
 
 class CommentSchema(Schema):
     id = fields.Integer(dump_only=True)
-    create_time = fields.DateTime()
+    create_time = fields.DateTime(dump_only=True)
     update_time = fields.DateTime()
     to_bot = fields.Integer()
     add_by_user = fields.Integer()

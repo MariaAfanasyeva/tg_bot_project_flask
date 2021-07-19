@@ -76,7 +76,7 @@ class BotListOrCreateResource(Resource):
         )
         db.session.add(new_bot)
         db.session.commit()
-        return bot_schema.dump(new_bot)
+        return bot_schema.dump(new_bot), 201
 
 
 class BotResource(Resource):
@@ -119,7 +119,7 @@ class CommentBotResource(Resource):
         )
         db.session.add(new_comment)
         db.session.commit()
-        return comment_schema.dump(new_comment)
+        return comment_schema.dump(new_comment), 201
 
     def get(self, id):
         comments = Comment.query.filter_by(to_bot=id)
