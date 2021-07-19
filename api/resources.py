@@ -7,8 +7,10 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from app import db, pagination
 
-from .models import Bot, Category, User
-from .schemas import *
+from .models import Bot, Category, Comment, User
+from .schemas import (bot_schema, bots_schema, categories_schema,
+                      category_schema, comment_schema, comments_schema,
+                      user_schema, users_schema)
 
 
 class UserLoginResource(Resource):
@@ -85,21 +87,75 @@ class BotResource(Resource):
     @jwt_required()
     def put(self, id):
         bot = Bot.query.get_or_404(id)
-        bot.name = request.json["name"]
-        bot.description = request.json["description"]
-        bot.link = request.json["link"]
-        bot.author = request.json["author"]
-        bot.category_id = request.json["category_id"]
-        bot.add_by_user = get_jwt_identity()
-        db.session.commit()
-        return bot_schema.dump(bot)
+        if bot.add_by_user == get_jwt_identity():
+            bot.name = request.json["name"]
+            bot.description = request.json["description"]
+            bot.link = request.json["link"]
+            bot.author = request.json["author"]
+            bot.category_id = request.json["category_id"]
+            db.session.commit()
+            return bot_schema.dump(bot)
+        else:
+            return jsonify({"message": "Only authors can edit bots"})
 
     @jwt_required()
     def delete(self, id):
         bot = Bot.query.get_or_404(id)
-        db.session.delete(bot)
+        if bot.add_by_user == get_jwt_identity():
+            db.session.delete(bot)
+            db.session.commit()
+            return "", 204
+        else:
+            return jsonify({"message": "Only authors can delete bots"})
+
+
+class CommentBotResource(Resource):
+    @jwt_required()
+    def post(self, id):
+        to_bot = id
+        content = request.json["content"]
+        new_comment = Comment(
+            to_bot=to_bot, add_by_user=get_jwt_identity(), content=content
+        )
+        db.session.add(new_comment)
         db.session.commit()
-        return "", 204
+        return comment_schema.dump(new_comment)
+
+    def get(self, id):
+        comments = Comment.query.filter_by(to_bot=id)
+        return pagination.paginate(comments, comments_schema, marshmallow=True)
+
+
+class CommentsUserResource(Resource):
+    def get(self, id):
+        comments = Comment.query.filter_by(add_by_user=id)
+        return pagination.paginate(comments, comments_schema, marshmallow=True)
+
+
+class CommentResource(Resource):
+    def get(self, id):
+        comment = Comment.query.get_or_404(id)
+        return comment_schema.dump(comment)
+
+    @jwt_required()
+    def put(self, id):
+        comment = Comment.query.get_or_404(id)
+        if comment.add_by_user == get_jwt_identity():
+            comment.content = request.json["content"]
+            db.session.commit()
+            return comment_schema.dump(comment)
+        else:
+            return jsonify({"message": "Only authors can edit comments"})
+
+    @jwt_required()
+    def delete(self, id):
+        comment = Comment.query.get_or_404(id)
+        if comment.add_by_user == get_jwt_identity():
+            db.session.delete(comment)
+            db.session.commit()
+            return "", 204
+        else:
+            return jsonify({"message": "Only authors can delete comments"})
 
 
 class SignUpUserResource(Resource):

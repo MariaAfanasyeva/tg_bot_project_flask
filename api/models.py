@@ -44,6 +44,7 @@ class Bot(BaseModel):
         db.ForeignKey("user.id", ondelete="SET NULL"),
         nullable=True,
     )
+    comments = db.relationship("Comment", backref="bot", lazy=True)
 
     def __str__(self):
         return f"{self.name} by {self.author}"
@@ -63,6 +64,23 @@ class User(BaseModel):
 
     def __repr__(self):
         return f"{self.username}"
+
+
+class Comment(BaseModel):
+    __tablename__ = "comment"
+    to_bot = db.Column(
+        db.Integer, db.ForeignKey("bot.id", ondelete="CASCADE"), nullable=False
+    )
+    add_by_user = db.Column(
+        db.Integer, db.ForeignKey("user.id", ondelete="SET NULL"), nullable=True
+    )
+    content = db.Column(db.Text, nullable=False)
+
+    def __str__(self):
+        return f"Comment to bot {self.to_bot} by user {self.add_by_user}"
+
+    def __repr__(self):
+        return f"Comment to bot {self.to_bot} by user {self.add_by_user}"
 
 
 @event.listens_for(Session, "before_flush")
