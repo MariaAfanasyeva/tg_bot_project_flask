@@ -12,8 +12,12 @@ from services.logging_funcs import (after_request_log, before_request_log,
 class BaseModel(db.Model):
     __abstract__ = True
     id = db.Column(db.Integer, primary_key=True)
-    create_time = db.Column(db.DateTime, default=datetime.datetime.utcnow())
-    update_time = db.Column(db.DateTime, server_default=func.now(), onupdate=func.now())
+    create_time = db.Column(
+        db.DateTime, default=datetime.datetime.utcnow(), nullable=False
+    )
+    update_time = db.Column(
+        db.DateTime, server_default=func.now(), onupdate=func.now(), nullable=False
+    )
 
 
 class Category(BaseModel):
@@ -25,7 +29,7 @@ class Category(BaseModel):
         return f"{self.name}"
 
     def __repr__(self):
-        return f"{self.name}"
+        return self.__str__()
 
 
 class Bot(BaseModel):
@@ -44,12 +48,13 @@ class Bot(BaseModel):
         db.ForeignKey("user.id", ondelete="SET NULL"),
         nullable=True,
     )
+    comments = db.relationship("Comment", backref="bot", lazy=True)
 
     def __str__(self):
         return f"{self.name} by {self.author}"
 
     def __repr__(self):
-        return f"{self.name} by {self.author}"
+        return self.__str__()
 
 
 class User(BaseModel):
@@ -62,7 +67,24 @@ class User(BaseModel):
         return f"{self.username}"
 
     def __repr__(self):
-        return f"{self.username}"
+        return self.__str__()
+
+
+class Comment(BaseModel):
+    __tablename__ = "comment"
+    to_bot_id = db.Column(
+        db.Integer, db.ForeignKey("bot.id", ondelete="CASCADE"), nullable=False
+    )
+    add_by_user = db.Column(
+        db.Integer, db.ForeignKey("user.id", ondelete="SET NULL"), nullable=True
+    )
+    content = db.Column(db.Text, nullable=False)
+
+    def __str__(self):
+        return f"Comment to bot {self.to_bot} by user {self.add_by_user}"
+
+    def __repr__(self):
+        return self.__str__()
 
 
 @event.listens_for(Session, "before_flush")
