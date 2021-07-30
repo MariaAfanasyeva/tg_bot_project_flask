@@ -4,7 +4,7 @@ from marshmallow import Schema, fields
 class BotSchema(Schema):
     id = fields.Integer(dump_only=True)
     create_time = fields.DateTime(dump_only=True)
-    update_time = fields.DateTime()
+    update_time = fields.DateTime(dump_only=True)
     name = fields.Str()
     description = fields.Str()
     link = fields.Str()
@@ -20,7 +20,7 @@ bots_schema = BotSchema(many=True)
 class CategorySchema(Schema):
     id = fields.Integer(dump_only=True)
     create_time = fields.DateTime(dump_only=True)
-    update_time = fields.DateTime()
+    update_time = fields.DateTime(dump_only=True)
     name = fields.Str()
 
 
@@ -31,7 +31,7 @@ categories_schema = CategorySchema(many=True)
 class UserSchema(Schema):
     id = fields.Integer(dump_only=True)
     create_time = fields.DateTime(dump_only=True)
-    update_time = fields.DateTime()
+    update_time = fields.DateTime(dump_only=True)
     username = fields.Str()
     password = fields.Str()
     email = fields.Email()
@@ -44,7 +44,7 @@ users_schema = UserSchema(many=True)
 class CommentSchema(Schema):
     id = fields.Integer(dump_only=True)
     create_time = fields.DateTime(dump_only=True)
-    update_time = fields.DateTime()
+    update_time = fields.DateTime(dump_only=True)
     to_bot = fields.Integer()
     add_by_user = fields.Integer()
     content = fields.Str()
@@ -52,3 +52,15 @@ class CommentSchema(Schema):
 
 comment_schema = CommentSchema()
 comments_schema = CommentSchema(many=True)
+
+
+class LikeSchema(Schema):
+    id = fields.Integer(dump_only=True)
+    create_time = fields.DateTime(dump_only=True)
+    update_time = fields.DateTime(dump_only=True)
+    to_bot_id = fields.Integer()
+    add_by_user = fields.Integer()
+
+
+like_schema = LikeSchema()
+likes_schema = LikeSchema(many=True)

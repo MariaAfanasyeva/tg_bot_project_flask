@@ -49,6 +49,7 @@ class Bot(BaseModel):
         nullable=True,
     )
     comments = db.relationship("Comment", backref="bot", lazy=True)
+    likes = db.relationship("Like", backref="bot", lazy=True)
 
     def __str__(self):
         return f"{self.name} by {self.author}"
@@ -82,6 +83,22 @@ class Comment(BaseModel):
 
     def __str__(self):
         return f"Comment to bot {self.to_bot} by user {self.add_by_user}"
+
+    def __repr__(self):
+        return self.__str__()
+
+
+class Like(BaseModel):
+    __tablename__ = "like"
+    to_bot_id = db.Column(
+        db.Integer, db.ForeignKey("bot.id", ondelete="CASCADE"), nullable=False
+    )
+    add_by_user = db.Column(
+        db.Integer, db.ForeignKey("user.id", ondelete="SET NULL"), nullable=True
+    )
+
+    def __str__(self):
+        return f"like to {self.to_bot_id} by {self.author}"
 
     def __repr__(self):
         return self.__str__()

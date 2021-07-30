@@ -7,10 +7,10 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from app import db, pagination
 
-from .models import Bot, Category, Comment, User
+from .models import Bot, Category, Comment, Like, User
 from .schemas import (bot_schema, bots_schema, categories_schema,
                       category_schema, comment_schema, comments_schema,
-                      user_schema, users_schema)
+                      like_schema, likes_schema, user_schema, users_schema)
 
 
 class UserLoginResource(Resource):
@@ -152,6 +152,33 @@ class CommentResource(Resource):
         comment = Comment.query.get_or_404(id)
         if comment.add_by_user == get_jwt_identity():
             db.session.delete(comment)
+            db.session.commit()
+            return "", 204
+        else:
+            return jsonify({"message": "Only authors can delete comments"})
+
+
+class GetAllLikesResource(Resource):
+    def get(self):
+        likes = Like.query.all()
+        return likes_schema.dump(likes)
+
+
+class AddLikeResource(Resource):
+    @jwt_required()
+    def post(self, id):
+        new_like = Like(to_bot_id=id, add_by_user=get_jwt_identity())
+        db.session.add(new_like)
+        db.session.commit()
+        return like_schema.dump(new_like), 201
+
+
+class DeleteLikeResource(Resource):
+    @jwt_required()
+    def delete(self, id):
+        like = Like.query.get_or_404(id)
+        if like.add_by_user == get_jwt_identity():
+            db.session.delete(like)
             db.session.commit()
             return "", 204
         else:
