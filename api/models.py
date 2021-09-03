@@ -5,8 +5,12 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql import func
 
 from app import db
-from services.logging_funcs import (after_request_log, before_request_log,
-                                    before_rollback_log, session_handler)
+from services.logging_funcs import (
+    after_request_log,
+    before_request_log,
+    before_rollback_log,
+    session_handler,
+)
 
 
 class BaseModel(db.Model):
@@ -82,7 +86,7 @@ class Comment(BaseModel):
     content = db.Column(db.Text, nullable=False)
 
     def __str__(self):
-        return f"Comment to bot {self.to_bot} by user {self.add_by_user}"
+        return f"Comment to bot {self.to_bot_id} by user {self.add_by_user}"
 
     def __repr__(self):
         return self.__str__()
@@ -99,6 +103,22 @@ class Like(BaseModel):
 
     def __str__(self):
         return f"like to {self.to_bot_id} by {self.author}"
+
+    def __repr__(self):
+        return self.__str__()
+
+
+class Video(BaseModel):
+    __tablename__ = "video"
+    file_key = db.Column(db.String(100), unique=True, nullable=False)
+    add_by_user = db.Column(
+        db.Integer, db.ForeignKey("user.id", ondelete="SET NULL"), nullable=True
+    )
+    s3_link = db.Column(db.String(100), unique=True, nullable=False)
+    glacier_link = db.Column(db.String(100), unique=True, nullable=True)
+
+    def __str__(self):
+        return f"video {self.name}"
 
     def __repr__(self):
         return self.__str__()

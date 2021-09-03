@@ -64,3 +64,14 @@ class LikeSchema(Schema):
 
 like_schema = LikeSchema()
 likes_schema = LikeSchema(many=True)
+
+
+class VideoSchema(Schema):
+    id = fields.Integer(dump_only=True)
+    create_time = fields.DateTime(dump_only=True)
+    update_time = fields.DateTime(dump_only=True)
+    name = fields.Str()
+
+
+video_schema = VideoSchema()
+videos_schema = VideoSchema(many=True)

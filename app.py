@@ -2,6 +2,8 @@ import datetime
 import os
 from logging.config import dictConfig
 
+from celery import Celery
+import boto3
 from dotenv import find_dotenv, load_dotenv
 from flask import Flask
 from flask_cors import CORS
@@ -48,6 +50,9 @@ app.config["JWT_ACCESS_TOKEN_EXPIRES"] = datetime.timedelta(minutes=30)
 app.config["PAGINATE_PAGE_SIZE"] = 2
 app.config["PAGINATE_PAGINATION_OBJECT_KEY"] = None
 app.config["PAGINATE_DATA_OBJECT_KEY"] = "results"
+app.config["CELERY_BROKER_URL"] = "redis://localhost:6379/0"
+app.config["CELERY_RESULT_BACKEND"] = "redis://localhost:6379/0"
+app.config["UPLOAD_FOLDER"] = "static/uploads"
 
 db = SQLAlchemy(app)
 
@@ -55,7 +60,29 @@ pagination = Pagination(app, db)
 
 migrate = Migrate(app, db)
 
+
+def make_celery(app):
+    celery = Celery(
+        "tasks", backend="redis://localhost:6379/0", broker="redis://localhost:6379/0"
+    )
+    celery.conf.update(app.config)
+
+    class ContextTask(celery.Task):
+        def __call__(self, *args, **kwargs):
+            with app.app_context():
+                return self.run(*args, **kwargs)
+
+    celery.Task = ContextTask
+    return celery
+
+
 jwt = JWTManager(app)
+
+s3 = boto3.client(
+    "s3",
+    aws_access_key_id=os.environ.get("ACCESS_KEY"),
+    aws_secret_access_key=os.environ.get("SECRET_ACCESS_KEY"),
+)
 
 SWAGGER_URL = "/swagger"
 API_URL = "/static/swagger.json"
@@ -63,7 +90,6 @@ SWAGGERUI_BLUEPRINT = get_swaggerui_blueprint(
     SWAGGER_URL, API_URL, config={"app_name": "Find-your-bot"}
 )
 app.register_blueprint(SWAGGERUI_BLUEPRINT, url_prefix=SWAGGER_URL)
-
 
 from api.urls import *
 
