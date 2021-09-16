@@ -1,16 +1,29 @@
+from __future__ import absolute_import
 from flask import jsonify, request
-from flask_jwt_extended import (create_access_token, get_jwt_identity,
-                                jwt_required)
+from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from flask_restful import Resource
 from sqlalchemy import or_
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from app import db, pagination
+import tasks
+from app import db, pagination, s3
 
-from .models import Bot, Category, Comment, Like, User
-from .schemas import (bot_schema, bots_schema, categories_schema,
-                      category_schema, comment_schema, comments_schema,
-                      like_schema, likes_schema, user_schema, users_schema)
+from api.consts import ALLOWED_EXTENSIONS
+from api.models import Bot, Category, Comment, Like, User, Video
+from api.schemas import (
+    bot_schema,
+    bots_schema,
+    categories_schema,
+    category_schema,
+    comment_schema,
+    comments_schema,
+    like_schema,
+    likes_schema,
+    user_schema,
+    users_schema,
+)
+
+S3_OBJECT_BASE_URL = "https://flask-video-tg.s3.eu-central-1.amazonaws.com/"
 
 
 class UserLoginResource(Resource):
@@ -109,20 +122,26 @@ class BotResource(Resource):
             return jsonify({"message": "Only authors can delete bots"})
 
 
+class BotsFromUserResource(Resource):
+    def get(self, id):
+        bots = Bot.query.filter_by(add_by_user=id)
+        return pagination.paginate(bots, bots_schema, marshmallow=True)
+
+
 class CommentBotResource(Resource):
     @jwt_required()
     def post(self, id):
         to_bot = id
         content = request.json["content"]
         new_comment = Comment(
-            to_bot=to_bot, add_by_user=get_jwt_identity(), content=content
+            to_bot_id=to_bot, add_by_user=get_jwt_identity(), content=content
         )
         db.session.add(new_comment)
         db.session.commit()
         return comment_schema.dump(new_comment), 201
 
     def get(self, id):
-        comments = Comment.query.filter_by(to_bot=id)
+        comments = Comment.query.filter_by(to_bot_id=id)
         return pagination.paginate(comments, comments_schema, marshmallow=True)
 
 
@@ -185,6 +204,50 @@ class DeleteLikeResource(Resource):
             return jsonify({"message": "Only authors can delete comments"})
 
 
+class VideoResource(Resource):
+    @jwt_required()
+    def post(self):
+        if "file" not in request.files:
+            return jsonify({"messsage": "No file part"})
+        file = request.files["file"]
+        if file.filename == "":
+            return jsonify({"message": "No selected file."})
+        if file:
+            if not file.filename.endswith(tuple(ALLOWED_EXTENSIONS)):
+                return jsonify({"message": "Unsupported file extension."})
+            try:
+                s3_values = s3.list_objects(Bucket="flask-video-tg")["Contents"]
+            except Exception:
+                s3_values = [{"Key": None}]
+            finally:
+                for obj in s3_values:
+                    if obj["Key"] == file.filename:
+                        return jsonify(
+                            {"message": "File with the same name already exists."}
+                        )
+                try:
+                    s3.upload_fileobj(
+                        Fileobj=file, Bucket="flask-video-tg", Key=file.filename
+                    )
+                except Exception:
+                    return jsonify(
+                        {
+                            "message": "The file could not be uploaded. Something went wrong."
+                        }
+                    )
+                finally:
+                    s3_link = S3_OBJECT_BASE_URL + file.filename
+                    new_video = Video(
+                        file_key=file.filename,
+                        add_by_user=get_jwt_identity(),
+                        s3_link=s3_link,
+                    )
+                    db.session.add(new_video)
+                    db.session.commit()
+                    tasks.resize_video.delay(file.filename, new_video.id)
+                return jsonify({"message": "Thanks for your video"})
+
+
 class SignUpUserResource(Resource):
     def post(self):
         username = request.json["username"]
@@ -210,3 +273,9 @@ class UsersListResource(Resource):
     def get(self):
         users = User.query.all()
         return users_schema.dump(users)
+
+
+class UserResource(Resource):
+    def get(self, id):
+        user = User.query.get_or_404(id)
+        return user_schema.dump(user)
