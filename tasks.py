@@ -1,8 +1,9 @@
 from __future__ import absolute_import
-from app import app, make_celery, s3
+from app import app, make_celery, s3, db
 import os
 import boto3
 from moviepy.editor import VideoFileClip
+from api.models import Video
 
 
 app.config.update(
@@ -14,7 +15,7 @@ celery = make_celery(app)
 
 
 @celery.task
-def resize_video(key):
+def resize_video(key, obj_id):
     try:
         s3.download_file("flask-video-tg", key, key)
         try:
@@ -23,9 +24,12 @@ def resize_video(key):
                 aws_access_key_id=os.environ.get("ACCESS_KEY"),
                 aws_secret_access_key=os.environ.get("SECRET_ACCESS_KEY"),
             )
-            glacier.upload_archive(
+            uploading_info = glacier.upload_archive(
                 vaultName="tg_flask_source_videos", body=open(key, "rb")
             )
+            video = Video.query.get(obj_id)
+            video.glacier_link = uploading_info["archiveId"]
+            db.session.commit()
 
         except Exception as e:
             print(e)

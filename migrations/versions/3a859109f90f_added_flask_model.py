@@ -1,8 +1,8 @@
-"""Created model Video
+"""Added flask model
 
-Revision ID: fe15f9f5d816
+Revision ID: 3a859109f90f
 Revises: 4d89a34f8904
-Create Date: 2021-09-03 13:50:25.321841
+Create Date: 2021-09-07 13:22:23.257257
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = "fe15f9f5d816"
+revision = "3a859109f90f"
 down_revision = "4d89a34f8904"
 branch_labels = None
 depends_on = None
@@ -30,8 +30,8 @@ def upgrade():
         ),
         sa.Column("file_key", sa.String(length=100), nullable=False),
         sa.Column("add_by_user", sa.Integer(), nullable=True),
-        sa.Column("s3_link", sa.String(length=100), nullable=False),
-        sa.Column("glacier_link", sa.String(length=100), nullable=True),
+        sa.Column("s3_link", sa.String(length=200), nullable=False),
+        sa.Column("glacier_link", sa.String(length=200), nullable=True),
         sa.ForeignKeyConstraint(["add_by_user"], ["user.id"], ondelete="SET NULL"),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("file_key"),

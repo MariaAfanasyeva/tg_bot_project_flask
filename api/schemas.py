@@ -70,7 +70,10 @@ class VideoSchema(Schema):
     id = fields.Integer(dump_only=True)
     create_time = fields.DateTime(dump_only=True)
     update_time = fields.DateTime(dump_only=True)
-    name = fields.Str()
+    file_key = fields.Str()
+    add_by_user = fields.Integer()
+    s3_link = fields.Str()
+    glacier_link = fields.Str()
 
 
 video_schema = VideoSchema()

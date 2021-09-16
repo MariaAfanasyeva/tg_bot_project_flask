@@ -114,11 +114,11 @@ class Video(BaseModel):
     add_by_user = db.Column(
         db.Integer, db.ForeignKey("user.id", ondelete="SET NULL"), nullable=True
     )
-    s3_link = db.Column(db.String(100), unique=True, nullable=False)
-    glacier_link = db.Column(db.String(100), unique=True, nullable=True)
+    s3_link = db.Column(db.String(200), unique=True, nullable=False)
+    glacier_link = db.Column(db.String(200), unique=True, nullable=True)
 
     def __str__(self):
-        return f"video {self.name}"
+        return f"video {self.file_key}"
 
     def __repr__(self):
         return self.__str__()

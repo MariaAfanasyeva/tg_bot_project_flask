@@ -8,8 +8,9 @@ from werkzeug.security import check_password_hash, generate_password_hash
 import tasks
 from app import db, pagination, s3
 
-from .models import Bot, Category, Comment, Like, User, Video
-from .schemas import (
+from api.consts import ALLOWED_EXTENSIONS
+from api.models import Bot, Category, Comment, Like, User, Video
+from api.schemas import (
     bot_schema,
     bots_schema,
     categories_schema,
@@ -212,35 +213,39 @@ class VideoResource(Resource):
         if file.filename == "":
             return jsonify({"message": "No selected file."})
         if file:
-            for obj in s3.list_objects(Bucket="flask-video-tg")["Contents"]:
-                print(obj)
-                if obj["Key"] == file.filename:
-                    return jsonify(
-                        {"message": "File with the same name already exists."}
-                    )
-                else:
-                    try:
-                        s3.upload_fileobj(
-                            Fileobj=file, Bucket="flask-video-tg", Key=file.filename
-                        )
-                    except Exception:
+            if not file.filename.endswith(tuple(ALLOWED_EXTENSIONS)):
+                return jsonify({"message": "Unsupported file extension."})
+            try:
+                s3_values = s3.list_objects(Bucket="flask-video-tg")["Contents"]
+            except Exception:
+                s3_values = [{"Key": None}]
+            finally:
+                for obj in s3_values:
+                    if obj["Key"] == file.filename:
                         return jsonify(
-                            {
-                                "message": "The file could not be uploaded. Something went wrong."
-                            }
+                            {"message": "File with the same name already exists."}
                         )
-                    finally:
-                        s3_link = S3_OBJECT_BASE_URL + file.filename
-                        new_video = Video(
-                            file_key=file.filename,
-                            add_by_user=get_jwt_identity(),
-                            s3_link=s3_link,
-                        )
-                        db.session.add(new_video)
-                        print(db.session)
-                        db.session.commit()
-                        tasks.resize_video.delay(file.filename)
-            return jsonify({"message": "Thanks for your video"})
+                try:
+                    s3.upload_fileobj(
+                        Fileobj=file, Bucket="flask-video-tg", Key=file.filename
+                    )
+                except Exception:
+                    return jsonify(
+                        {
+                            "message": "The file could not be uploaded. Something went wrong."
+                        }
+                    )
+                finally:
+                    s3_link = S3_OBJECT_BASE_URL + file.filename
+                    new_video = Video(
+                        file_key=file.filename,
+                        add_by_user=get_jwt_identity(),
+                        s3_link=s3_link,
+                    )
+                    db.session.add(new_video)
+                    db.session.commit()
+                    tasks.resize_video.delay(file.filename, new_video.id)
+                return jsonify({"message": "Thanks for your video"})
 
 
 class SignUpUserResource(Resource):
